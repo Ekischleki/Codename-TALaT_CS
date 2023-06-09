@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codename TALaT_CS", "Codena
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Txtac", "..\Text adventure Script Interpreter\Txtac.csproj", "{28B35E3B-67B3-4298-97D6-AFA005301DFF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataTypeStoreLib", "..\DataTypeStoreLib\DataTypeStoreLib.csproj", "{0FDCEB4B-518C-4659-91EF-2754E87A4229}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{28B35E3B-67B3-4298-97D6-AFA005301DFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28B35E3B-67B3-4298-97D6-AFA005301DFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28B35E3B-67B3-4298-97D6-AFA005301DFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FDCEB4B-518C-4659-91EF-2754E87A4229}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FDCEB4B-518C-4659-91EF-2754E87A4229}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FDCEB4B-518C-4659-91EF-2754E87A4229}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FDCEB4B-518C-4659-91EF-2754E87A4229}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
