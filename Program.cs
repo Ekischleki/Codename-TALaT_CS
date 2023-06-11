@@ -49,6 +49,11 @@ namespace Codename_TALaT_CS
             }
             SFM.baseDirectory = Path.Combine(gamePath, "SFM-Files");
 
+            Log.Shared.LogL("Loading storys");
+            GlobalManager.LoadAllStorys( DataTypeStore.Read.TopLevelRegion(
+                File.ReadAllText(Path.Combine(gamePath, "LauncherSave\\Storys.save")).Split(";", StringSplitOptions.RemoveEmptyEntries)
+                )[0]);
+
 
             Log.Shared.LogL("Starting Main menu UI");
             UI.MainMenu(translationEn);

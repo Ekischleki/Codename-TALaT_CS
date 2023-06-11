@@ -25,7 +25,13 @@ namespace Codename_TALaT_CS
         //Settings End
 
 
+        public void RunStory()
+        {
+            Global.InitInternalNamespaces();
+            Global.internalFiles = codeFiles;
 
+            LoadFile.RunCode(LoadFile.ByPath(storyStart.path));
+        }
 
 
         /// <summary>
@@ -109,7 +115,8 @@ namespace Codename_TALaT_CS
 
                 }
             }
-
+            Log.Shared.LogL("Finishing import");
+            storyStart.path = codeFiles.First(x => x.Hash == storyStart.Hash).path;
 
             Log.Shared.LogL("Cleaning up");
             Directory.Delete(tempDir, true);
@@ -159,6 +166,7 @@ namespace Codename_TALaT_CS
                 result.directValues.Add(new("storyVer", storyVer, false));
                 result.directValues.Add(new("updatesVer", updatesVer, false));
                 result.directValues.Add(new("updatesPackage", updatesPackage, false));
+
                 //Save settings end
 
                 return result;
@@ -169,6 +177,7 @@ namespace Codename_TALaT_CS
         {
             codeFiles = InternalFileEmulation.LoadInternalFiles(region.FindSubregionWithName("codeFiles"));
             descriptions = InternalFileEmulation.LoadInternalFiles(region.FindSubregionWithName("descriptions"));
+            languages = new();
             region.FindSubregionWithNameArray("sLang").ToList().ForEach(x => languages.Add(new(x)));
 
             //Settings
@@ -179,6 +188,7 @@ namespace Codename_TALaT_CS
             storyVer = region.FindDirectValue("storyVer").value;
             updatesVer = region.FindDirectValue("updatesVer").value;
             updatesPackage = region.FindDirectValue("updatesPackage").value;
+            storyStart.path = codeFiles.First(x => x.Hash == storyStart.Hash).path;
 
 
 

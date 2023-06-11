@@ -36,6 +36,13 @@ namespace Codename_TALaT_CS
 
                         Console.WriteLine(GlobalManager.allStories.Last().SaveStory.RegionSaveString);
                         break;
+                    case "save":
+                        File.WriteAllText(Path.Combine(TextAdventureLauncher.gamePath, "LauncherSave\\Storys.save"), GlobalManager.SaveAllStorys.RegionSaveString);
+                        break;
+
+                    case "y":
+                        DisplayAllStorys();
+                        break;
                     default:
                         Console.Clear();
                         Console.WriteLine(translation.Get("NotRecignisedCommend", new string[] { command }));
@@ -44,6 +51,27 @@ namespace Codename_TALaT_CS
                         break;
                 }
             }
+
+
+
+        }
+        public static void DisplayAllStorys()
+        {
+            Console.Clear();
+            for (int i = 0; i < GlobalManager.allStories.Count; i++)
+            {
+                Story story = GlobalManager.allStories[i];
+                Console.WriteLine($"-----{i}: {story.storyName}-----");
+                Console.WriteLine(story.descriptions.First(x => x.path == story.storyDefaultLangVal).Content);
+            }
+            Console.WriteLine("---------------------\nEnter the number of the story you want to start.");
+            if (!int.TryParse(Console.ReadLine(), out int startStory))
+            {
+                Console.WriteLine("That story number is invalid.");
+                return;
+            }
+            Console.Clear();
+            GlobalManager.allStories[startStory].RunStory();
         }
     }
 }
