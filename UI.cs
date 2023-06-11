@@ -43,6 +43,16 @@ namespace Codename_TALaT_CS
                     case "y":
                         DisplayAllStorys();
                         break;
+                    case "update":
+                        Task[] update = new Task[GlobalManager.allStories.Count];
+                        for (int i = 0; i < update.Length; i++) 
+                        {
+                            GlobalManager.allStories[i].UpdateStory();
+                            //update[i] = new(() => { GlobalManager.allStories[i].UpdateStory(); });
+                            //update[i].Start();
+                        }
+                        break;
+
                     default:
                         Console.Clear();
                         Console.WriteLine(translation.Get("NotRecignisedCommend", new string[] { command }));

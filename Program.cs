@@ -27,7 +27,7 @@ namespace Codename_TALaT_CS
             Log.Shared.LogL("Initialising base language");
             translationEn = new();
             Log.Shared.LogL("Checking save path");
-           
+
 
             if (!File.Exists(Path.Combine(gamePath, "LauncherSave")))
             {
@@ -50,9 +50,11 @@ namespace Codename_TALaT_CS
             SFM.baseDirectory = Path.Combine(gamePath, "SFM-Files");
 
             Log.Shared.LogL("Loading storys");
-            GlobalManager.LoadAllStorys( DataTypeStore.Read.TopLevelRegion(
-                File.ReadAllText(Path.Combine(gamePath, "LauncherSave\\Storys.save")).Split(";", StringSplitOptions.RemoveEmptyEntries)
-                )[0]);
+
+            if (File.Exists(Path.Combine(gamePath, "LauncherSave\\Storys.save")))
+                GlobalManager.LoadAllStorys(DataTypeStore.Read.TopLevelRegion(
+                    File.ReadAllText(Path.Combine(gamePath, "LauncherSave\\Storys.save")).Split(";", StringSplitOptions.RemoveEmptyEntries)
+                    )[0]);
 
 
             Log.Shared.LogL("Starting Main menu UI");

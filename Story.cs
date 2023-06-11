@@ -32,14 +32,61 @@ namespace Codename_TALaT_CS
 
             LoadFile.RunCode(LoadFile.ByPath(storyStart.path));
         }
+        public async void UpdateStory()
+        {
+            HttpClient downloader = new HttpClient();
+            Log.Shared.LogE($"Downloading ver for story {storyName}");
+            string response = await downloader.GetStringAsync(updatesVer);
+            if (response == storyVer)
+            {
+                Log.Shared.LogE($"No update found for story {storyName}");
+                return;
+            }
+            Log.Shared.LogE($"Update found for story {storyName}");
+            Log.Shared.LogE($"Clearing story {storyName}");
+            ClearStory();
+            Log.Shared.LogE($"Downloading package from story {storyName}");
 
+            var zipFile = await downloader.GetByteArrayAsync(updatesPackage);
+
+            string tempFile = Path.GetTempFileName();
+
+            File.WriteAllBytes(tempFile, zipFile);
+
+            Log.Shared.LogE($"Importing story {storyName}");
+
+            ImportPackage(tempFile);
+
+
+
+
+        }
+
+        public void ClearStory()
+        {
+            codeFiles.ForEach(x => x.Content = null);
+            codeFiles = new();
+            descriptions.ForEach(x => x.Content = null);
+            descriptions = new();
+            languages = new();
+        }
 
         /// <summary>
         /// Imports a story using a story package.
         /// </summary>
         /// <param name="packagePath"></param>
         /// 
+
+
         public Story(string packagePath)
+        {
+
+            ImportPackage(packagePath);
+
+
+        }
+
+        private void ImportPackage(string packagePath)
         {
             packagePath = packagePath.RemoveWorking('\"');
             //Tempdir setup
@@ -121,12 +168,7 @@ namespace Codename_TALaT_CS
             Log.Shared.LogL("Cleaning up");
             Directory.Delete(tempDir, true);
             Log.Shared.LogE("Story successfully imported!");
-
-
-
         }
-
-
 
 
         /// <summary>

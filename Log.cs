@@ -36,19 +36,23 @@ namespace Codename_TALaT_CS
             Console.Clear();
             Console.WriteLine($"Please wait while\n{message}");
             logWriter.WriteLine(message);
+            logWriter.Flush();
         }
         public void LogN(string message)
         {
             if (!enableLogger) return;
 
             logWriter.WriteLine(message);
+            logWriter.Flush();
+
         }
         public void LogE(string message)
         {
             if (!enableLogger) return;
-            Console.Clear();
             Console.WriteLine(message);
             logWriter.WriteLine(message);
+            logWriter.Flush();
+
         }
     }
 }

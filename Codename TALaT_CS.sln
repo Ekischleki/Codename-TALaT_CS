@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Txtac", "..\Text adventure 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTypeStoreLib", "..\DataTypeStoreLib\DataTypeStoreLib.csproj", "{0FDCEB4B-518C-4659-91EF-2754E87A4229}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SickFileManager", "..\SickFileManager\SickFileManager.csproj", "{506209DB-7C2A-450F-9C92-1163DD1558DA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SickFileManager", "..\SickFileManager\SickFileManager.csproj", "{506209DB-7C2A-450F-9C92-1163DD1558DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Installer", "..\Installer\Installer.csproj", "{9DA27D62-83F8-4C08-9264-6B253BD0210E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{506209DB-7C2A-450F-9C92-1163DD1558DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{506209DB-7C2A-450F-9C92-1163DD1558DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{506209DB-7C2A-450F-9C92-1163DD1558DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9DA27D62-83F8-4C08-9264-6B253BD0210E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DA27D62-83F8-4C08-9264-6B253BD0210E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DA27D62-83F8-4C08-9264-6B253BD0210E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9DA27D62-83F8-4C08-9264-6B253BD0210E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
