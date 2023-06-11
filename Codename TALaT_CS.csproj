@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DataTypeStoreLib\DataTypeStoreLib.csproj" />
+    <ProjectReference Include="..\SickFileManager\SickFileManager.csproj" />
     <ProjectReference Include="..\Text adventure Script Interpreter\Txtac.csproj" />
   </ItemGroup>
 
