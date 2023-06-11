@@ -29,6 +29,20 @@ namespace Codename_TALaT_CS
 
         }
 
+        public Region SaveTranslation
+        {
+            get
+            {
+                Region result = new("TI"); //Translation Instance
+                result.directValues.Add(new("language", language, true));
+                translation.Keys.ToList().ForEach(x =>
+                {
+                    result.SubRegions.Add(new("T", new List<Region>(), new() { new("id", x, false), new("t", translation[x], false) }));
+                });
+
+                return result;
+            }
+        }
         /// <summary>
         /// Loads all standart translations in the english language to be either a basis for another language, or be used as default language.
         /// </summary>
@@ -39,9 +53,13 @@ namespace Codename_TALaT_CS
             {
                 { "MainMenuHead", "Main Menu" },
                 { "", "" },
-                { "MainMenuY", "Press y to start a story" },
+                { "MainMenuY", "Type y to start a story" },
                 { "NoStorys", "Whoops, quite empty in here... Try to import some storys first!" },
                 { "NotRecignisedCommend", "\"%0%\" isn't a recognised command?!" },
+                { "MainMenuImport", "Type import to import a story" },
+                { "ImportPath", "Enter the filepath of the story you want to import (Tip: You can drag and drop it into this window).\nOr type %0% to exit" },
+                { "CommandExit", "exit" },
+
 
 
             };
@@ -67,7 +85,7 @@ namespace Codename_TALaT_CS
                 {
                     if (inEscape)
                     {
-                        if (int.TryParse(escapingValue, out int parsed) || parsed > usableValues.Length) throw new Exception("Translation.Invalid_Escape_Value");
+                        if (!int.TryParse(escapingValue, out int parsed) || parsed > usableValues.Length) throw new Exception("Translation.Invalid_Escape_Value");
                         result += usableValues[parsed];
                         inEscape = false;
                         escapingValue = "";
