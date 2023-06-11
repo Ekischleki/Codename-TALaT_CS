@@ -1,9 +1,12 @@
-﻿namespace Codename_TALaT_CS
+﻿using SickFileManager;
+
+namespace Codename_TALaT_CS
 {
     public class TextAdventureLauncher
     {
         public static readonly string gamePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TALaT");
         public static Translation translationEn;
+        public static List<Translation> allTranslations = new List<Translation>();
 
 
 
@@ -24,11 +27,31 @@
             Log.Shared.LogL("Initialising base language");
             translationEn = new();
             Log.Shared.LogL("Checking save path");
+           
+
             if (!File.Exists(Path.Combine(gamePath, "LauncherSave")))
             {
                 Directory.CreateDirectory(Path.Combine(gamePath, "LauncherSave"));
             }
-            Log.Shared.LogL("Loading translations...");
+            else
+            {
+                Log.Shared.LogL("Loading translations");
+                DataTypeStore.Read.TopLevelRegion(File.ReadAllText(Path.Combine(gamePath, "LauncherSave\\TranslationSave")).Split(';')).ForEach(x =>
+                    allTranslations.Add(new(x))
+                );
+
+
+            }
+            Log.Shared.LogL("Preparing internal non-save files manager (SFM)");
+            if (!Directory.Exists(Path.Combine(gamePath, "SFM-Files")))
+            {
+                Directory.CreateDirectory(Path.Combine(gamePath, "SFM-Files"));
+            }
+            SFM.baseDirectory = Path.Combine(gamePath, "SFM-Files");
+
+
+            Log.Shared.LogL("Starting Main menu UI");
+            UI.MainMenu(translationEn);
 
 
 
