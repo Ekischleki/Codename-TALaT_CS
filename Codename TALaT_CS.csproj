@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="NSwag.ApiDescription.Client" Version="13.0.5">
       <PrivateAssets>all</PrivateAssets>
@@ -23,8 +24,9 @@
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
   </ItemGroup>
 
-  <ItemGroup>
+	<ItemGroup>
     <ProjectReference Include="..\DataTypeStoreLib\DataTypeStoreLib.csproj" />
+    <ProjectReference Include="..\Installer\Installer.csproj" />
     <ProjectReference Include="..\SickFileManager\SickFileManager.csproj" />
     <ProjectReference Include="..\Text adventure Script Interpreter\Txtac.csproj" />
   </ItemGroup>
