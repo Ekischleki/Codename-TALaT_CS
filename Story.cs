@@ -1,5 +1,7 @@
 ﻿using DataTypeStore;
+using SFM;
 using System.IO.Compression;
+using System.Numerics;
 using TASI;
 
 namespace Codename_TALaT_CS
@@ -22,9 +24,29 @@ namespace Codename_TALaT_CS
         public string storyVer;
         public string updatesVer;
         public string updatesPackage;
+        public bool storyActive = true;
+        public RSAKeygenLib.KeyPair storyCreatorKey;
+        public string updatesRandomStoryID;
+
+        enum Properties
+        {
+            storyUseLauncherFunctions,
+            storyHasUpdating,
+            updatesNeedSignature,
+            hasNoSignature,
+            installThirdPartyLibs,
+            useDefaultLanguageConfig,
+            useCustomName,
+            useCustomDescription
+        }
         //Settings End
 
-
+        public Story() 
+        {
+            codeFiles = new();
+            descriptions = new();
+            languages = new();
+        }
         public void RunStory()
         {
             Global.InitInternalNamespaces();
@@ -54,8 +76,14 @@ namespace Codename_TALaT_CS
             File.WriteAllBytes(tempFile, zipFile);
 
             Log.Shared.LogE($"Importing story {storyName}");
-
-            ImportPackage(tempFile);
+            try
+            {
+                ImportPackage(tempFile);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Update was faulty. The previous version cannot be restored. Removing assets");
+            }
 
 
 
@@ -88,89 +116,130 @@ namespace Codename_TALaT_CS
 
         private void ImportPackage(string packagePath)
         {
+
             packagePath = packagePath.RemoveWorking('\"');
             //Tempdir setup
             Log.Shared.LogL("Setting up temp dir");
             string tempDir = Path.Combine(Path.GetTempPath(), $"TALaT-StoryImport-{Random.Shared.Next()}");
             Directory.CreateDirectory(tempDir);
-            ZipFile.ExtractToDirectory(packagePath, tempDir, true);
-
-            Log.Shared.LogL("Importing code files");
-            codeFiles = LoadAllFilesFromBaseDir(Path.Combine(tempDir, "Story\\Code"), "\\");
-            Log.Shared.LogL("Importing description files");
-            descriptions = LoadAllFilesFromBaseDir(Path.Combine(tempDir, "Story\\Meta\\Description"), "", true);
-            //Importing files done
-
-            Log.Shared.LogL("Loading supported languages");
-            languages = new();
-            File.ReadAllText(Path.Combine(tempDir, "Story\\Meta\\SupportedLanguages"))
-                .RemoveWorking('\r')
-                .RemoveWorking('\n')
-                .Split(';', StringSplitOptions.RemoveEmptyEntries)
-                .ToList()
-                .ForEach(x => languages.Add(new(x)));
-            Log.Shared.LogL("Loading launcher metadata");
-
-            foreach (string line in File.ReadAllText(Path.Combine(tempDir, "Story\\Meta\\Launcher")).RemoveWorking('\r').RemoveWorking('\n').Split(';', StringSplitOptions.RemoveEmptyEntries))
+            try
             {
-                string command = "";
+                ZipFile.ExtractToDirectory(packagePath, tempDir, true);
+                Log.Shared.LogL("Checking signature: Importing key");
+                
 
-                foreach (char c in line)
+                Region signatureRegion = Read.TopLevelRegion(File.ReadAllText(Path.Combine(tempDir, "Story\\Signature")).Split(';'))[0];
+                storyCreatorKey = new(signatureRegion.FindSubregionWithName("KeyPair"));
+
+                Log.Shared.LogL("Checking signature: Hashing");
+                BigInteger hash = BigInteger.Parse( HashFolderUtils.HashFolder(new string[] { Path.Combine(tempDir, "Story\\Code"), Path.Combine(tempDir, "Story\\Meta") }), System.Globalization.NumberStyles.HexNumber);
+                
+                Log.Shared.LogL("Checking signature: Validating");
+                Log.Shared.LogE("Decrypted hash: " + storyCreatorKey.CryptUsingKeypair(BigInteger.Parse(signatureRegion.FindDirectValue("signedHash").value)));
+
+                if (storyCreatorKey.CryptUsingKeypair( BigInteger.Parse(signatureRegion.FindDirectValue("signedHash").value)) == hash) 
                 {
-                    if (c == '=')
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        command += c;
-                    }
+                    Log.Shared.LogE("Signature valid.");
+
                 }
 
-                string value = line.Substring(command.Length + 1);
+                Log.Shared.LogL("Importing code files");
+                codeFiles = LoadAllFilesFromBaseDir(Path.Combine(tempDir, "Story\\Code"), "\\");
+                Log.Shared.LogL("Importing description files");
+                descriptions = LoadAllFilesFromBaseDir(Path.Combine(tempDir, "Story\\Meta\\Description"), "", true);
+                //Importing files done
 
-                switch (command.ToLower())
+                Log.Shared.LogL("Loading supported languages");
+                languages = new();
+                File.ReadAllText(Path.Combine(tempDir, "Story\\Meta\\SupportedLanguages"))
+                    .RemoveWorking('\r')
+                    .RemoveWorking('\n')
+                    .Split(';', StringSplitOptions.RemoveEmptyEntries)
+                    .ToList()
+                    .ForEach(x => languages.Add(new(x)));
+                Log.Shared.LogL("Loading launcher metadata");
+
+                foreach (string line in File.ReadAllText(Path.Combine(tempDir, "Story\\Meta\\Launcher")).RemoveWorking('\r').RemoveWorking('\n').Split(';', StringSplitOptions.RemoveEmptyEntries))
                 {
-                    case "storyname":
-                        storyName = value;
-                        break;
-                    case "storystart":
-                        InternalFileEmulation? storyStart = codeFiles.FirstOrDefault(x => x.path.ToLower() == value.ToLower(), null);
-                        if (storyStart == null)
-                            throw new Exception("Launcher_Metadata.Not_Found_Start_Path: The file, that was set as the story start, doesn't exist in the Code folder.");
-                        this.storyStart = storyStart;
-                        break;
-                    case "storydefaultlangval":
-                        if (!languages.Any(x => x.internalReference == value))
-                            throw new Exception("Launcher_Metadata.Not_Found_Internal_Language: The language, that was explained as storyDefaultLangVar isn't said to be a supported language.");
-                        storyDefaultLangVal = value;
-                        break;
-                    case "storyuselauncherfunctions":
-                        storyUseLauncherFunctions = bool.Parse(value);
-                        break;
-                    case "updatesver":
-                        updatesVer = value;
-                        break;
-                    case "updatespackage":
-                        updatesPackage = value;
-                        break;
-                    case "storyver":
-                        storyVer = value;
-                        break;
-                    default:
-                        throw new Exception("Launcher_Metadata.Unknown_Metadata_Variable");
+                    string command = "";
 
+                    foreach (char c in line)
+                    {
+                        if (c == '=')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            command += c;
+                        }
+                    }
+
+                    string value = line.Substring(command.Length + 1);
+
+                    switch (command.ToLower())
+                    {
+                        case "storyname":
+                            storyName = value;
+                            break;
+                        case "storystart":
+                            InternalFileEmulation? storyStart = codeFiles.FirstOrDefault(x => x.path.ToLower() == value.ToLower(), null);
+                            if (storyStart == null)
+                                throw new Exception("Launcher_Metadata.Not_Found_Start_Path: The file, that was set as the story start, doesn't exist in the Code folder.");
+                            this.storyStart = storyStart;
+                            break;
+                        case "storydefaultlangval":
+                            if (!languages.Any(x => x.internalReference == value))
+                                throw new Exception("Launcher_Metadata.Not_Found_Internal_Language: The language, that was explained as storyDefaultLangVar isn't said to be a supported language.");
+                            storyDefaultLangVal = value;
+                            break;
+                        case "storyuselauncherfunctions":
+                            storyUseLauncherFunctions = bool.Parse(value);
+                            break;
+                        case "updatesver":
+                            updatesVer = value;
+                            break;
+                        case "updatespackage":
+                            updatesPackage = value;
+                            break;
+                        case "updatesrandomstoryid":
+                            updatesRandomStoryID = $"{value}";
+                            break;
+                        case "storyver":
+                            storyVer = value;
+                            break;
+                        default:
+                            throw new Exception("Launcher_Metadata.Unknown_Metadata_Variable");
+
+                    }
                 }
+                Log.Shared.LogL("Finishing import");
+                storyStart.path = codeFiles.First(x => x.Hash == storyStart.Hash).path;
+
+
+                Log.Shared.LogE("Story successfully imported!");
             }
-            Log.Shared.LogL("Finishing import");
-            storyStart.path = codeFiles.First(x => x.Hash == storyStart.Hash).path;
-
-            Log.Shared.LogL("Cleaning up");
-            Directory.Delete(tempDir, true);
-            Log.Shared.LogE("Story successfully imported!");
+            catch (Exception ex)
+            {
+                DeleteStory();
+                throw;
+            }
+            finally
+            {
+                Log.Shared.LogL("Cleaning up");
+                Directory.Delete(tempDir, true);
+            }
         }
 
+        public void DeleteStory()
+        {
 
+            codeFiles?.ForEach(x => x.Content = null);
+            descriptions?.ForEach(x => x.Content = null);
+            if (storyStart != null)
+                storyStart.Content = null;
+            storyActive = false;
+        }
         /// <summary>
         /// Self-calling function, to load all files in a directory into the save-system and then loads all the directorys by calling itself.
         /// </summary>
@@ -200,6 +269,8 @@ namespace Codename_TALaT_CS
                 result.SubRegions.Add(InternalFileEmulation.SaveInternalFiles(descriptions, "descriptions"));
                 languages.ForEach(x => result.SubRegions.Add(x.SaveLanguage));
 
+                result.SubRegions.Add(storyCreatorKey.Save);
+
                 //Save settings
                 result.directValues.Add(new("storyName", storyName, false));
                 result.directValues.Add(new("storyStart", storyStart.Hash, false));
@@ -208,6 +279,7 @@ namespace Codename_TALaT_CS
                 result.directValues.Add(new("storyVer", storyVer, false));
                 result.directValues.Add(new("updatesVer", updatesVer, false));
                 result.directValues.Add(new("updatesPackage", updatesPackage, false));
+                result.directValues.Add(new("updatesRandomStoryID", updatesRandomStoryID, false));
 
                 //Save settings end
 
@@ -222,6 +294,8 @@ namespace Codename_TALaT_CS
             languages = new();
             region.FindSubregionWithNameArray("sLang").ToList().ForEach(x => languages.Add(new(x)));
 
+            storyCreatorKey = new(region.FindSubregionWithName("KeyPair"));
+
             //Settings
             storyName = region.FindDirectValue("storyName").value;
             storyStart = InternalFileEmulation.CreateWithHash("", region.FindDirectValue("storyStart").value);
@@ -230,6 +304,7 @@ namespace Codename_TALaT_CS
             storyVer = region.FindDirectValue("storyVer").value;
             updatesVer = region.FindDirectValue("updatesVer").value;
             updatesPackage = region.FindDirectValue("updatesPackage").value;
+            updatesRandomStoryID = region.FindDirectValue("updatesRandomStoryID").value;
             storyStart.path = codeFiles.First(x => x.Hash == storyStart.Hash).path;
 
 
