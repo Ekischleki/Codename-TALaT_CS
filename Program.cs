@@ -1,4 +1,8 @@
-﻿namespace Codename_TALaT_CS
+﻿using NUnit.Framework.Internal;
+using SFM;
+using System.Collections.ObjectModel;
+
+namespace Codename_TALaT_CS
 {
     public class TextAdventureLauncher
     {
@@ -59,29 +63,36 @@
             else
             {
                 Log.Shared.LogL("Loading translations");
-                DataTypeStore.Read.TopLevelRegion(File.ReadAllText(Path.Combine(gamePath, "LauncherSave\\TranslationSave")).Split(';')).ForEach(x =>
+                DataTypeStoreLib.Read.TopLevelRegion(File.ReadAllText(Path.Combine(gamePath, "LauncherSave\\TranslationSave")).Split(';')).ForEach(x =>
                     allTranslations.Add(new(x))
                 );
 
 
             }
             Log.Shared.LogL("Preparing internal non-save files manager (SFM)");
-            if (!Directory.Exists(Path.Combine(gamePath, "SFM-Files")))
+            SFM.SFMEngine.baseDirectory = Path.Combine(gamePath, "SFM-Files");
+            if (!Directory.Exists(SFMEngine.baseDirectory))
             {
-                Directory.CreateDirectory(Path.Combine(gamePath, "SFM-Files"));
+                Directory.CreateDirectory(SFMEngine.baseDirectory);
+                SFMEngine.FirstTimeInitializeDirectory();
             }
-            SFM.SFM.baseDirectory = Path.Combine(gamePath, "SFM-Files");
+            
 
             Log.Shared.LogL("Loading storys");
 
             if (File.Exists(Path.Combine(gamePath, "LauncherSave\\Storys.save")))
-                GlobalManager.LoadAllStorys(DataTypeStore.Read.TopLevelRegion(
+                GlobalManager.LoadAllStorys(DataTypeStoreLib.Read.TopLevelRegion(
                     File.ReadAllText(Path.Combine(gamePath, "LauncherSave\\Storys.save")).Split(";", StringSplitOptions.RemoveEmptyEntries)
                     )[0]);
-            if (File.Exists(Path.Combine(gamePath, "LauncherSave\\creatorkeys.save")))
-                GlobalManager.creatorKeys = new( DataTypeStore.Read.TopLevelRegion(
-                    File.ReadAllText(Path.Combine(gamePath, "LauncherSave\\creatorkeys.save")).Split(";", StringSplitOptions.RemoveEmptyEntries)
-                    )[0]);
+            
+
+            Log.Shared.LogL("Clearing unused files");
+            InternalFileEmulation.RemoveUnused();
+
+            ObservableCollection<Story> storys;
+
+            storys = DataTypeStoreLib.Automatic.ConvertRegion( DataTypeStoreLib.Automatic.Object(GlobalManager.allStories , "STORYS")) as ObservableCollection<Story>;
+
 
 
             Log.Shared.LogL("Starting Main menu UI");

@@ -1,4 +1,4 @@
-﻿using DataTypeStore;
+﻿using DataTypeStoreLib;
 using NUnit.Framework;
 
 namespace Codename_TALaT_CS

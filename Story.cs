@@ -1,4 +1,4 @@
-﻿using DataTypeStore;
+﻿using ObjectStoreE;
 using SFM;
 using System.IO.Compression;
 using System.Numerics;
@@ -49,10 +49,10 @@ namespace Codename_TALaT_CS
         }
         public void RunStory()
         {
-            Global.InitInternalNamespaces();
-            Global.internalFiles = codeFiles;
+            Global globalStoryObject = new Global();
+            globalStoryObject.InternalFiles = codeFiles;
 
-            LoadFile.RunCode(LoadFile.ByPath(storyStart.path));
+            LoadFile.RunCode(LoadFile.ByPath(storyStart.path, globalStoryObject), globalStoryObject);
         }
         public async void UpdateStory()
         {
@@ -128,7 +128,7 @@ namespace Codename_TALaT_CS
                 Log.Shared.LogL("Checking signature: Importing key");
                 
 
-                Region signatureRegion = Read.TopLevelRegion(File.ReadAllText(Path.Combine(tempDir, "Story\\Signature")).Split(';'))[0];
+                Region signatureRegion = Region.CreateSingleRegionByString(File.ReadAllText(Path.Combine(tempDir, "Story\\Signature")));
                 storyCreatorKey = new(signatureRegion.FindSubregionWithName("KeyPair"));
 
                 Log.Shared.LogL("Checking signature: Hashing");
@@ -272,14 +272,14 @@ namespace Codename_TALaT_CS
                 result.SubRegions.Add(storyCreatorKey.Save);
 
                 //Save settings
-                result.directValues.Add(new("storyName", storyName, false));
-                result.directValues.Add(new("storyStart", storyStart.Hash, false));
-                result.directValues.Add(new("storyDefaultLangVal", storyDefaultLangVal, false));
-                result.directValues.Add(new("storyUseLauncherFunctions", storyUseLauncherFunctions.ToString(), false));
-                result.directValues.Add(new("storyVer", storyVer, false));
-                result.directValues.Add(new("updatesVer", updatesVer, false));
-                result.directValues.Add(new("updatesPackage", updatesPackage, false));
-                result.directValues.Add(new("updatesRandomStoryID", updatesRandomStoryID, false));
+                result.DirectValues.Add(new("storyName", storyName, false));
+                result.DirectValues.Add(new("storyStart", storyStart.Hash, false));
+                result.DirectValues.Add(new("storyDefaultLangVal", storyDefaultLangVal, false));
+                result.DirectValues.Add(new("storyUseLauncherFunctions", storyUseLauncherFunctions.ToString(), false));
+                result.DirectValues.Add(new("storyVer", storyVer, false));
+                result.DirectValues.Add(new("updatesVer", updatesVer, false));
+                result.DirectValues.Add(new("updatesPackage", updatesPackage, false));
+                result.DirectValues.Add(new("updatesRandomStoryID", updatesRandomStoryID, false));
 
                 //Save settings end
 
@@ -357,9 +357,9 @@ namespace Codename_TALaT_CS
             get
             {
                 Region result = new("sLang");
-                launcherLanguage.ForEach(x => result.directValues.Add(new("ll", x, false)));
-                result.directValues.Add(new("sl", storyLanguage, false));
-                result.directValues.Add(new("ir", internalReference, false));
+                launcherLanguage.ForEach(x => result.DirectValues.Add(new("ll", x, false)));
+                result.DirectValues.Add(new("sl", storyLanguage, false));
+                result.DirectValues.Add(new("ir", internalReference, false));
                 return result;
             }
         }
